@@ -174,6 +174,7 @@ struct ip6_rthdr {
 
 #define IPV6_RTHDR_TYPE_0 0
 #define IPV6_RTHDR_TYPE_2 2
+#define IPV6_RTHDR_TYPE_4 4
 
 /* Type 0 Routing header */
 /* Also used for Type 2 */
@@ -186,6 +187,41 @@ struct ip6_rthdr0 {
 	uint8_t  ip6r0_slmap[3];	/* strict/loose bit map */
 	struct in6_addr ip6r0_addr[1];	/* up to 23 addresses */
 } UNALIGNED;
+
+/* Type 4 Segment Routing header */
+struct ip6_rthdr4 {
+	u_int8_t  ip6r4_nxt;		/* next header */
+	u_int8_t  ip6r4_len;		/* length in units of 8 octets */
+	u_int8_t  ip6r4_type;		/* always 4 */
+	u_int8_t  ip6r4_segleft;	/* segments left */
+	u_int8_t  ip6r4_firstseg;	/* first segment pointer */
+	u_int16_t ip6r4_flags;		/* flags */
+	u_int8_t  ip6r4_reserved;	/* reserved */
+	struct in6_addr ip6r4_addr[1];	/* segments & TLV's & HMAC */
+} UNALIGNED;
+
+#define IP6SR_CLEANUP		0x8000	/* clean-up at last hop */
+#define IP6SR_PROTECTED		0x4000	/* fast-rerouted packet */
+#define IP6SR_OAM		0x2000	/* OAM packet */
+#define IP6SR_ALERT		0x1000	/* Important TLV's present */
+#define IP6SR_HMAC		0x0800	/* HMAC TLV is present */
+
+/* Segment routing Type-Length-Value */
+struct ip6_rthdr4_tlv {
+	u_int8_t  ip6_rthdr4_tlv_type;	/* type */
+	u_int8_t  ip6_rthdr4_tlv_len;	/* length */
+	u_int8_t  ip6_rthdr4_tlv_data[1]; /* value */
+} UNALIGNED;
+
+/* Segment routing TLV types */
+enum ip6_rthdr4_tlv_types {
+	IP6SR_TLV_UNDEFINED = 0,	/* not defined */
+	IP6SR_TLV_INGRESS_NODE,		/* SR zone ingress node */
+	IP6SR_TLV_EGRESS_NODE,		/* expected SR zone egress node */
+	IP6SR_TLV_OPAQUE_CONTAINER,	/* opaque data */
+	IP6SR_TLV_PADDING,		/* padding */
+	IP6SR_TLV_HMAC,			/* HMAC data */
+};
 
 /* Fragment header */
 struct ip6_frag {

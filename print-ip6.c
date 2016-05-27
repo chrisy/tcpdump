@@ -51,6 +51,7 @@ ip6_finddst(netdissect_options *ndo, struct in6_addr *dst,
 	const struct in6_addr *dst_addr;
 	const struct ip6_rthdr *dp;
 	const struct ip6_rthdr0 *dp0;
+	const struct ip6_rthdr4 *dp4;
 	const struct in6_addr *addr;
 	int i, len;
 
@@ -113,6 +114,13 @@ ip6_finddst(netdissect_options *ndo, struct in6_addr *dst,
 					dst_addr = addr;
 					addr++;
 				}
+				break;
+
+			case IPV6_RTHDR_TYPE_4:		/* V6 Segment Routing Header */
+				dp4 = (const struct ip6_rthdr4 *)dp;
+				if (len % 2 == 1)
+					goto trunc;
+				dst_addr = &dp4->ip6r4_addr[0];
 				break;
 
 			default:
